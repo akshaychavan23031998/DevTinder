@@ -166,6 +166,32 @@ app.get("/admin/delete", (req, res) => {
 app.get("/user", userAuth, (req, res) => {
     res.send("user Authenticated and got user data");    
 })
+*/
+
+/*
+Error handling
+// 1st way
+app.get("user", (req, res) => { // very bad way of writting, and it will only work for the app.get
+    throw new Error("sdfgh");
+    res.status(500).send("User not found");
+})
+
+// 2nd way
+app.use("/user", (err,req, res, next) => {  // best way of writting, and it will work for all HTTP Methods, as we are using app.use
+    res.status(500).send("Something went wrong");
+})
+
+// 3rd Way: Prper way of error handling using is try and catch block.
+app.get("/user", (req, res) => {
+    try {
+        throw new Error("sdfgh");
+        res.send("User Data Send");
+    }
+    catch (error) {
+        console.error(error);
+        res.status(500).send("Something went wrong");
+    }    
+})
 
 app.listen(7777, () => {
     console.log('Dev Tinder is running on port 7777');
