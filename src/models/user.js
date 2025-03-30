@@ -1,5 +1,9 @@
 const mongoose = require('mongoose');
 
+var validator = require('validator');
+
+// now in our validation it can take any email id without @.com .in and etc, and to writ eits logic its difficult,
+// so we have a npm package called validator, and just we need to reuire it and call it in post API Call.
 const userSchema = new mongoose.Schema({
     firstName: {
         type: String,
@@ -16,6 +20,12 @@ const userSchema = new mongoose.Schema({
         required: true,
         lowercase: true,
         trim: true,
+        validate: {
+            validator: function (value) { // ✅ Correct function syntax
+                return validator.isEmail(value); // Returns true if valid
+            },
+            message: "Invalid email format" // Custom error message
+        },
         unique: true//==>> this will not allow same email id of the multiple users, now each and every user must have unique email id.
     },
     password: {

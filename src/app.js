@@ -10,6 +10,19 @@ const user = require("./models/user");
 
 app.use(express.json());    //==>> its a middleware
 
+app.post("/signup", async (req, res) => {
+    const users = new user(req.body); //==>> this is dynamic.
+    try {
+        await users.save();
+        res.send("User Signed up successfully");
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
+/*
 //API Lavel Validations: hv u ever wondered that most of the social media platforms deoes not allow us to
 // update the Email ID its bcz , now i hv login in with akshay and then i changed to celebraty name, and changed
 // the pphoto and all measn i am complty changing the ideantity right, so thats whay most of the
@@ -24,6 +37,7 @@ app.use(express.json());    //==>> its a middleware
 //     if(!isUpdateAllowed) {
 //         res.status(400).send("Update not allowed");
 //     };
+
 
 // API Validation for patch request: 
 app.patch("/updateuser", async (req, res) => {
@@ -50,7 +64,6 @@ app.patch("/updateuser", async (req, res) => {
 })
 
 
-/*
 app.post("/signup", async (req, res) => {
     // console.log(req.body); ==>> as i am getting the JS Object in this from the postman/user
     // creating a new instance of user model
