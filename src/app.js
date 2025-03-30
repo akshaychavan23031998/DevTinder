@@ -10,6 +10,47 @@ const user = require("./models/user");
 
 app.use(express.json());    //==>> its a middleware
 
+//API Lavel Validations: hv u ever wondered that most of the social media platforms deoes not allow us to
+// update the Email ID its bcz , now i hv login in with akshay and then i changed to celebraty name, and changed
+// the pphoto and all measn i am complty changing the ideantity right, so thats whay most of the
+// patforms does not allow us, so how we can do that is at API Level validations we can do these things,
+// and its only releted to the update.
+
+// this is the API Validation: 
+// const ALLOWED_UPDATES = ["userId", "photo", "about", "gender", "age"];
+//     const isUpdateAllowed = Object.keys(data).every((k) => {
+//         ALLOWED_UPDATES.includes(k)
+//     });
+//     if(!isUpdateAllowed) {
+//         res.status(400).send("Update not allowed");
+//     };
+
+// API Validation for patch request: 
+app.patch("/updateuser", async (req, res) => {
+    const data = req.body;
+    const userId = req.body.userId;
+
+    const ALLOWED_UPDATES = ["userId", "photo", "about", "gender", "age"];
+
+    const isUpdateAllowed = Object.keys(data).every((k) => {
+        ALLOWED_UPDATES.includes(k)
+    });
+    if(!isUpdateAllowed) {
+        res.status(400).send("Update not allowed");
+    };
+
+    try {
+        await user.findByIdAndUpdate({_id: userId}, data);
+        res.send("User updated successfully");
+    }
+    catch (err) {
+        // console.error("Error:", err);
+        res.status(500).send("Server Error");
+    }
+})
+
+
+/*
 app.post("/signup", async (req, res) => {
     // console.log(req.body); ==>> as i am getting the JS Object in this from the postman/user
     // creating a new instance of user model
@@ -25,22 +66,6 @@ app.post("/signup", async (req, res) => {
     }
 })
 
-
-// update user by finding its id
-app.patch("/updateuser", async (req, res) => {
-    const data = req.body;
-    const userId = req.body.userId;
-    try {
-        await user.findByIdAndUpdate({_id: userId}, data);
-        res.send("User updated successfully");
-    }
-    catch (err) {
-        // console.error("Error:", err);
-        res.status(500).send("Server Error");
-    }
-})
-
-/*
 // delete user by finding the Id.
 app.delete("/deleteuser", async (req, res) => {
     const userId = req.body.userId;
