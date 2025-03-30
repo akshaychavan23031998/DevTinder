@@ -10,6 +10,22 @@ const user = require("./models/user");
 
 app.use(express.json());    //==>> its a middleware
 
+app.post("/signup", async (req, res) => {
+    // console.log(req.body); ==>> as i am getting the JS Object in this from the postman/user
+    // creating a new instance of user model
+    const users = new user(req.body); //==>> this is dynamic.
+
+    try {
+        await users.save();
+        res.send("User Signed up successfully");
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+})
+
+
 // update user by finding its id
 app.patch("/updateuser", async (req, res) => {
     const data = req.body;
