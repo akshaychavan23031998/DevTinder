@@ -11,9 +11,35 @@ const user = require("./models/user");
 const { validateSignUpData } = require("./utils/Validations");
 
 const bcrypt = require('bcrypt');
+// const user = require('./models/user');
 
 app.use(express.json());    //==>> its a middleware
 
+// now we have seen that we had hashed the password but how to validate it ?
+// generally we give email and password at the time of login, so for that we need to write login API Call.
+app.post("/login", async (req, res) => {
+    const {emailId, password} = req.body;
+    //now here we also need to perform the validation for the email and password,
+    // like its valid emailId and password or not ? 
+    // & then the email id is present in the db if yes then check its password.
+    const existingUser = await user.findOne({emailId: emailId});
+    try {
+        if(!existingUser) {
+            throw new Error("New Email ID, please signup");
+        }
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+
+        if(isPasswordValid) {
+            res.send("Logged In Successfully");
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+})
+
+/*
 // so here we 1st validate the data, then encrypting the password by using the bcrypt package, 
 // then we arr passing this hashedPassword to the value of password,
 // so that knwo should come to know about actual password given by user., only use should know this no one else if he knwo,
@@ -45,7 +71,7 @@ app.post("/signup", async (req, res) => {
     }
 });
 
-/*
+
 //API Lavel Validations: hv u ever wondered that most of the social media platforms deoes not allow us to
 // update the Email ID its bcz , now i hv login in with akshay and then i changed to celebraty name, and changed
 // the pphoto and all measn i am complty changing the ideantity right, so thats whay most of the
