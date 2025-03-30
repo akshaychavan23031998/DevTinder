@@ -10,6 +10,20 @@ const user = require("./models/user");
 
 app.use(express.json());    //==>> its a middleware
 
+// update user by finding its id
+app.patch("/updateuser", async (req, res) => {
+    const data = req.body;
+    const userId = req.body.userId;
+    try {
+        await user.findByIdAndUpdate({_id: userId}, data);
+        res.send("User updated successfully");
+    }
+    catch (err) {
+        // console.error("Error:", err);
+        res.status(500).send("Server Error");
+    }
+})
+
 /*
 // delete user by finding the Id.
 app.delete("/deleteuser", async (req, res) => {
