@@ -8,7 +8,37 @@ const {adminAuth, userAuth} = require('./middlewares/auth');
 
 const user = require("./models/user");
 
-// 1st POST API.
+app.use(express.json());
+
+app.post("/signup", async (req, res) => {
+    // console.log(req.body); ==>> as i am getting the JS Object in this from the postman/user
+    // creating a new instance of user model
+    const users = new user(req.body); //==>> this is dynamic.
+
+    try {
+        await users.save();
+        res.send("User Signed up successfully");
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+})
+
+/*
+app.post("/signup", async (req, res) => {
+    // console.log(req);
+    // console.log(req.body); ==>> this is give us undefined, its bcz our we are sending our data in JSON Formate inside body,
+    // and we will get JS Object, so for that we need something that converts this JSON to JS Object, 
+    // so for that expree has given us a middleware which wil be called each and every time, and converts our JSON to JS Object. 
+    // app.use(express.json()); ==>> now this will exicute each and every time for all HTTP Methods + all routes., 
+    // without this we will get undefined, bcz its JS Object and it did not get anything like JS Object inside body, 
+    // now we are sending JSON it will convert to JS Object and we will get values in the console.
+    console.log(req.body);
+});
+
+
+1st POST API., here we are passing values by hard coading it, how i can make it dynamic.
 app.post("/signup", async (req, res) => {
     const users = new user({
         firstName: "Akshay",
@@ -28,6 +58,8 @@ app.post("/signup", async (req, res) => {
         res.status(500).send("Server Error");
     }
 })
+
+*/
 
 connectDB()
 .then(() => {   // if DB Connection is successfull, then start the server, or else show the error of why DB Connecttion failed.
