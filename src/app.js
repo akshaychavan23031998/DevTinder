@@ -8,11 +8,34 @@ const {adminAuth, userAuth} = require('./middlewares/auth');
 
 const user = require("./models/user");
 
+const { validateSignUpData } = require("./utils/Validations");
+
+const bcrypt = require('bcrypt');
+
 app.use(express.json());    //==>> its a middleware
 
+// so here we 1st validate the data, then encrypting the password by using the bcrypt package, 
+// then we arr passing this hashedPassword to the value of password,
+// so that knwo should come to know about actual password given by user., only use should know this no one else if he knwo,
+// if he forgots then knwo one will know the password what he added as password.
 app.post("/signup", async (req, res) => {
-    const users = new user(req.body); //==>> this is dynamic.
     try {
+    //Validation of data
+    validateSignUpData(req);    // as soon as my data comes, ill validate it from my validation function from utils.
+
+    //encrypt the password, to encrypt the password we have one library called bcrypt and we will use that.
+    const {firstName,lastName,emailId,password} = req.body;
+    const hashPassword = await bcrypt.hash(password, 10);
+    console.log(hashPassword);  // $2b$10$wkLvexKUi/rwPlYYVwIDm.XI2lob9/GJ6HVLcQ1EhG0ODz4NJEU5. ==>> This is called hashed password.
+
+    const users = new user(
+        {
+            firstName,
+            lastName,
+            emailId,
+            password:  hashPassword, //==>> we are passing the hashed password here.
+        }
+    ); //==>> this is dynamic.
         await users.save();
         res.send("User Signed up successfully");
     }
