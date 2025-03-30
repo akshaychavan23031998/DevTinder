@@ -11,6 +11,20 @@ const user = require("./models/user");
 app.use(express.json());    //==>> its a middleware
 
 /*
+// delete user by finding the Id.
+app.delete("/deleteuser", async (req, res) => {
+    const userId = req.body.userId;
+    try {
+        const User = await user.findByIdAndDelete(userId);
+        res.send("User deleted successfully");
+    }
+    catch (err) {
+        // console.error("Error:", err);
+        res.status(500).send("Server Error");
+    }
+})
+
+
 // this is for my all users, it will not take anything in postman
 app.get("/allusers", async (req, res) => {
     try {
