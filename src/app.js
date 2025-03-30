@@ -2,7 +2,48 @@ const express = require('express');
 
 const app = express();
 
+const connectDB = require("./config/database");
+
 const {adminAuth, userAuth} = require('./middlewares/auth');
+
+const user = require("./models/user");
+
+// 1st POST API.
+app.post("/signup", async (req, res) => {
+    const users = new user({
+        firstName: "Akshay",
+        lastName: "Saini",
+        email: "akshay@Saini.com",
+        password: "123sdf456",
+        age: 25,
+        gender: "Male",
+    });
+
+    try {
+        await users.save();
+        res.send("User Signed up successfully");
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+})
+
+connectDB()
+.then(() => {   // if DB Connection is successfull, then start the server, or else show the error of why DB Connecttion failed.
+    console.log("DB Connected Successfully")
+    app.listen(7777, () => {
+        console.log('Dev Tinder is running on port 7777');
+    });
+})
+.catch((err) => {
+    console.error("DB Connect Fail", err);
+});
+
+// connectDB()
+//     .then(() => console.log("DB Connected Successfully"))
+//     .catch((err) => console.log("DB Connect Fail", err));
+
 
 // ex. 1st ==>> infinte loop
 // app.use("/user1", (req, res) => {
@@ -181,7 +222,8 @@ app.use("/user", (err,req, res, next) => {  // best way of writting, and it will
     res.status(500).send("Something went wrong");
 })
 
-// 3rd Way: Prper way of error handling using is try and catch block.
+
+3rd Way: Prper way of error handling using is try and catch block.
 app.get("/user", (req, res) => {
     try {
         throw new Error("sdfgh");
@@ -193,12 +235,12 @@ app.get("/user", (req, res) => {
     }    
 })
 
+
 app.listen(7777, () => {
     console.log('Dev Tinder is running on port 7777');
 });
 
 */
-
 /*
     const express = require('express');
 
