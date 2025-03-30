@@ -8,7 +8,50 @@ const {adminAuth, userAuth} = require('./middlewares/auth');
 
 const user = require("./models/user");
 
-app.use(express.json());
+app.use(express.json());    //==>> its a middleware
+
+/*
+// this is for my all users, it will not take anything in postman
+app.get("/allusers", async (req, res) => {
+    try {
+        // console.log("Request received at /allusers"); // Debugging log
+
+        const allUsers = await user.find({});
+        // console.log("Users fetched:", allUsers); // Debugging log
+
+        if (allUsers.length === 0) {
+            res.status(404).send("No users found");
+            return;
+        } else {
+            res.status(200).json(allUsers);
+        }
+    } 
+    catch (err) {
+        // console.error("Error:", err);
+        res.status(500).send("Server Error");
+    }
+});
+
+// this is for the perticular user, it will take a firstName in postman and accoridng to that it will give us the records.
+app.get("/user", async (req, res) => {
+    const userfirstName = req.body.firstName;
+    try {
+        const userName = await user.find({firstName: userfirstName});
+
+        if(userName.length == 0) {   // ==>> if my given or reqested user not found then it will return empty object. ex we have data for "Akshay" not for "akshay".
+            res.status(404).send("User not found");
+            return;
+        }
+        else {
+            res.send(userName); 
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
 
 app.post("/signup", async (req, res) => {
     // console.log(req.body); ==>> as i am getting the JS Object in this from the postman/user
@@ -25,7 +68,7 @@ app.post("/signup", async (req, res) => {
     }
 })
 
-/*
+
 app.post("/signup", async (req, res) => {
     // console.log(req);
     // console.log(req.body); ==>> this is give us undefined, its bcz our we are sending our data in JSON Formate inside body,
