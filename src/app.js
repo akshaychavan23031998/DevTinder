@@ -10,6 +10,32 @@ const jwt = require('jsonwebtoken');
 app.use(express.json());    //==>> its a middleware
 app.use(cookieParser());
 
+//Schema Methods: Off loaded the logic of password encryption and JWT Tooken.
+
+app.post("/login", async (req, res) => {
+    const {emailId, password} = req.body;
+    const existingUser = await user.findOne({emailId: emailId});
+    try {
+        if(!existingUser) {
+            throw new Error("New Email ID, please signup");
+        }
+        const isPasswordValid = await existingUser.validatePassword(password); // off laoded to user schema methods.
+
+        if(isPasswordValid) {
+            const token = await existingUser.getJWT();  // off laoded to user schema methods.
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 900000)
+            });
+            res.send("Logged In Successfully");
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+})
+
+/*
 //Updated the Login API by seting the expiry time of JWT token and cookie.
 app.post("/login", async (req, res) => {
     const {emailId, password} = req.body;
@@ -20,7 +46,7 @@ app.post("/login", async (req, res) => {
         }
         const isPasswordValid = await bcrypt.compare(password, existingUser.password);
 
-        if(isPasswordValid) {
+        if(isPasswordValid) {   // this jwt is getting generated for the all users, so we can off laod it to schema level by using schema method.
             const token = await jwt.sign({ _id: existingUser._id }, "devTinder@123", {
                 expiresIn: '1d',
             });
@@ -36,7 +62,7 @@ app.post("/login", async (req, res) => {
     }
 })
 
-/*
+
 //Authentication Middle ware: Updated profile API With Auth Middleware==>>
 
 // so till now we are using admin and userAuth, now how we can do it using cookies,

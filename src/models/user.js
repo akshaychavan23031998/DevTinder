@@ -1,6 +1,7 @@
 const mongoose = require('mongoose');
-
+const bcrypt = require('bcrypt');
 var validator = require('validator');
+const jwt = require('jsonwebtoken');
 
 // now in our validation it can take any email id without @.com .in and etc, and to writ eits logic its difficult,
 // so we have a npm package called validator, and just we need to reuire it and call it in post API Call.
@@ -50,6 +51,26 @@ const userSchema = new mongoose.Schema({
 }, 
 { timestamps: true }
 );
+
+// Generating the JWT Token:
+userSchema.methods.getJWT = async function () {
+    const user = this;
+    const token = await jwt.sign({ _id: user._id }, "devTinder@123", {
+        expiresIn: '1d',
+    });
+    return token;
+};
+
+//Validatingthe Hashpassword:
+userSchema.methods.validatePassword = async function(passwordInputByUser) {
+    const user = this;
+    const PasswordHash = user.password;
+
+    const isPasswordValid = await bcrypt.compare(passwordInputByUser, PasswordHash);
+
+    return isPasswordValid;
+}
+
 
 // const userModel = mongoose.model('user', userSchema); ==>> also can be done as this.
 module.exports = mongoose.model('user', userSchema);
