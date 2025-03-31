@@ -11,10 +11,52 @@ const user = require("./models/user");
 const { validateSignUpData } = require("./utils/Validations");
 
 const bcrypt = require('bcrypt');
+
+const cookieParser = require('cookie-parser')
 // const user = require('./models/user');
 
 app.use(express.json());    //==>> its a middleware
+app.use(cookieParser());
 
+//JWT Cookie & Authentication for login:
+
+// In this we are hard coading the values of JWT cookie.
+app.post("/login", async (req, res) => {
+    const {emailId, password} = req.body;
+    const existingUser = await user.findOne({emailId: emailId});
+    try {
+        if(!existingUser) {
+            throw new Error("New Email ID, please signup");
+        }
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+
+        if(isPasswordValid) {
+            //Create JWT Cookie here, once the Email ID & Password validated.
+            //add the token to cookie & send the response back to the user.
+            //so express js has given a inbult function called "res.cookie".
+            res.cookie("jwtcookie","sdfghjhg2345678");  
+            // now when ever i login ill send this cookie to my user, and it will there in the postman cookie option.
+            res.send("Logged In Successfully");
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+})
+
+// so in above /login POST API Call, we are storing the cookie, now i can get it ?
+// to get the cookie, we need to make a get API Call, GET /profile.
+
+app.get("/profile", (req, res) => {
+    const cookies = req.cookies;
+    //we can not get the cookie form the reqest directly, so to get the cookie from the request,
+    // we need to install a package given by express team "cookie-parser" and just we need to install & require it.
+    console.log(cookies);   // { jwtcookie: 'sdfghjhg2345678' } exactly same as given in login post api call.
+    res.send("Get Profile");
+})
+
+/*
 // now we have seen that we had hashed the password but how to validate it ?
 // generally we give email and password at the time of login, so for that we need to write login API Call.
 app.post("/login", async (req, res) => {
@@ -39,7 +81,7 @@ app.post("/login", async (req, res) => {
     }
 })
 
-/*
+
 // so here we 1st validate the data, then encrypting the password by using the bcrypt package, 
 // then we arr passing this hashedPassword to the value of password,
 // so that knwo should come to know about actual password given by user., only use should know this no one else if he knwo,
