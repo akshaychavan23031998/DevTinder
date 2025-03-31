@@ -1,25 +1,97 @@
 const express = require('express');
-
 const app = express();
-
 const connectDB = require("./config/database");
-
 const {adminAuth, userAuth} = require('./middlewares/auth');
-
 const user = require("./models/user");
-
 const { validateSignUpData } = require("./utils/Validations");
-
 const bcrypt = require('bcrypt');
-
 const cookieParser = require('cookie-parser')
-
 const jwt = require('jsonwebtoken');
-// const user = require('./models/user');
-
 app.use(express.json());    //==>> its a middleware
 app.use(cookieParser());
 
+//Authentication Middle ware: Updated profile API With Auth Middleware==>>
+
+// so till now we are using admin and userAuth, now how we can do it using cookies,
+// see there are only 2 API's signup API & Login API which does not require auth, 
+// bcz in these we are creating the token, creating the user and getting login the user.
+// but for profile, feed, connection request and other API's we need authentication, 
+// and we are going to do it using middleware, so that our not only 2 API's, our all API's will be secure.
+
+// so this is my profile should get opened only when it goes through the userAuth Middle ware form auth.js,
+// and if everything goes well in userAuth then it will goes to nect(); is the try and catch blcok of this get Profile API.
+
+app.post("/signup", async (req, res) => {
+    try {
+    validateSignUpData(req); 
+
+    const {firstName,lastName,emailId,password} = req.body;
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    const users = new user(
+        {
+            firstName,
+            lastName,
+            emailId,
+            password:  hashPassword, 
+        }
+    ); 
+        await users.save();
+        res.send("User Signed up successfully");
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
+app.post("/login", async (req, res) => {
+    const {emailId, password} = req.body;
+    const existingUser = await user.findOne({emailId: emailId});
+    try {
+        if(!existingUser) {
+            throw new Error("New Email ID, please signup");
+        }
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+
+        if(isPasswordValid) {
+            const token = await jwt.sign({ _id: existingUser._id }, "devTinder@123");
+            res.cookie("token", token);
+            res.send("Logged In Successfully");
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+})
+
+app.get("/profile", userAuth, async (req, res) => {
+    try {
+        //now we have removed the unwanted code or redundant code or the same code which is present in the authMiddleware and this API Call.
+        const userData = req.user;
+        res.send("Get Profile"+userData);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error"+err.message);
+    }
+})
+
+// with this API Call anyone can heat the connection request, but i want unless and until a user login, 
+// user cant send the connection reqest.
+// app.post("/sendConnectionRequest", (req, res) => {
+//     res.send("Connection Request Sent");
+// })
+
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
+    const user = req.user;
+    res.send("Hey you have Connection Request from "+user.firstName);
+});
+
+
+
+/*
 //JWT Cookie & Authentication for login:
 // Here we are generating the JWT Tooken dynamically using the npm package called "jsonwebtoken".
 app.post("/login", async (req, res) => {
@@ -93,7 +165,7 @@ app.get("/profile", async (req, res) => {
     }
 })
 
-/*
+
 // In this we are hard coading the values of JWT cookie.
 app.post("/login", async (req, res) => {
     const {emailId, password} = req.body;
