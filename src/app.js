@@ -10,6 +10,33 @@ const jwt = require('jsonwebtoken');
 app.use(express.json());    //==>> its a middleware
 app.use(cookieParser());
 
+//Updated the Login API by seting the expiry time of JWT token and cookie.
+app.post("/login", async (req, res) => {
+    const {emailId, password} = req.body;
+    const existingUser = await user.findOne({emailId: emailId});
+    try {
+        if(!existingUser) {
+            throw new Error("New Email ID, please signup");
+        }
+        const isPasswordValid = await bcrypt.compare(password, existingUser.password);
+
+        if(isPasswordValid) {
+            const token = await jwt.sign({ _id: existingUser._id }, "devTinder@123", {
+                expiresIn: '1d',
+            });
+            res.cookie("token", token, {
+                expires: new Date(Date.now() + 900000)
+            });
+            res.send("Logged In Successfully");
+        }
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+})
+
+/*
 //Authentication Middle ware: Updated profile API With Auth Middleware==>>
 
 // so till now we are using admin and userAuth, now how we can do it using cookies,
@@ -90,8 +117,6 @@ app.post("/sendConnectionRequest", userAuth, (req, res) => {
 });
 
 
-
-/*
 //JWT Cookie & Authentication for login:
 // Here we are generating the JWT Tooken dynamically using the npm package called "jsonwebtoken".
 app.post("/login", async (req, res) => {
