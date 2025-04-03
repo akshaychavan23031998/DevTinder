@@ -52,4 +52,25 @@ authRouter.post("/login", async (req, res) => {
     }
 })
 
+authRouter.post('/logout', async (req, res) => {
+    res.cookie("token", {
+        expires: new Date(Date.now()),
+    });
+    res.send("Logged Out Successfully");
+});
+
+/*
+We can also use this, which is more secure way ==>>
+
+authRouter.post('/logout', async (req, res) => {
+    res.clearCookie("token", {
+        httpOnly: true,
+        secure: true,  // Ensure this is consistent with how you set the cookie
+        sameSite: "strict",
+    });
+    res.json({ message: "Logged Out Successfully" });
+});
+
+*/
+
 module.exports = authRouter;
