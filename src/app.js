@@ -11,6 +11,8 @@ app.use(express.json());    //==>> its a middleware
 app.use(cookieParser());
 
 //Schema Methods: Off loaded the logic of password encryption and JWT Tooken.
+// so in this here we are writting all API's in one single file of APP.JS which is not a good thing to do,
+// so we will use Express router, so that we can easily manage all routers properly.
 
 app.post("/login", async (req, res) => {
     const {emailId, password} = req.body;
@@ -34,6 +36,46 @@ app.post("/login", async (req, res) => {
         res.status(500).send("Server Error");
     }
 })
+
+app.post("/signup", async (req, res) => {
+    try {
+    validateSignUpData(req); 
+
+    const {firstName,lastName,emailId,password} = req.body;
+    const hashPassword = await bcrypt.hash(password, 10);
+
+    const users = new user(
+        {
+            firstName,
+            lastName,
+            emailId,
+            password:  hashPassword, 
+        }
+    ); 
+        await users.save();
+        res.send("User Signed up successfully");
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error");
+    }
+});
+
+app.get("/profile", userAuth, async (req, res) => {
+    try {
+        const userData = req.user;
+        res.send("Get Profile"+userData);
+    }
+    catch (err) {
+        console.error(err);
+        res.status(500).send("Server Error"+err.message);
+    }
+})
+
+app.post("/sendConnectionRequest", userAuth, (req, res) => {
+    const user = req.user;
+    res.send("Hey you have Connection Request from "+user.firstName);
+});
 
 /*
 //Updated the Login API by seting the expiry time of JWT token and cookie.
