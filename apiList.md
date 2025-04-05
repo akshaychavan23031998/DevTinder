@@ -24,6 +24,11 @@ POST	==>>  /request/send/interested/:userid
 
 POST	==>>  /request/send/ingnore/:userid
 
+can i make interested & ingnored as dynamic by creating single one API ? yes by passing left ingnored and right swipe interested 
+
+**POST	==>>  /request/send/status/:userid**
+
+
 POST	==>>  /request/review/accepted/:requestid
 
 POST	==>>  /request/review/rejected/:requestid
@@ -36,4 +41,4 @@ GET		==>>  /requests/received
 
 GET		==>>  /feed	=>> Get the profile of other users on platform.
 
-**STATUS: interested, ingnore,accepted,rejected**
+**STATUS: interested, ingnored,accepted,rejected**
