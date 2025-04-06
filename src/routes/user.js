@@ -2,6 +2,7 @@ const express = require('express');
 const userRouter = express.Router();
 const {userAuth} = require('../middlewares/auth')
 const ConnectionRequest = require('../models/connectionRequest');
+const user = require('../models/user');
 
 
 //this API To get all pending requests.
@@ -24,6 +25,7 @@ userRouter.get('/user/request/received', userAuth, async (req, res) => {
     }
 })
 
+//this API To get all your connections wwho accepted u r request and u accepted others means ur al friends.
 userRouter.get('/user/connections', userAuth, async (req, res) => {
     try{
         const loggedInUser = req.user;
@@ -44,6 +46,43 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
         res.json({
             data
         });
+    }
+    catch(err) {
+        console.error(err);
+        res.status(500).send('Server Error');
+    }
+})
+
+//this API is for feed, so who's profile we need to show, all the users which are signedup except below
+// 1st i should not see my own profile in feed.
+// 2nd i should not see anyof my connection profile, means i am friend of them.
+// 3rd i should not see the profile of the user whome i sheared request.
+// 4th i should not see the profile of the user whome i ignored.
+
+userRouter.get('/user/feed', userAuth, async (req,res) => {
+    try{
+        const loggedInUser = req.user; // this is coming from the userAuth
+        // Find all connection req (sent + recived);
+        const connectionRequests = await ConnectionRequest.find({
+            $or: [{fromUserId: loggedInUser._id}, {toUserId: loggedInUser._id}],
+        }).select("fromUserId toUserId");
+
+        // now as these are my friends so i dont want all in my feed.
+        const hideUserFromFeed = new Set();
+        connectionRequests.forEach((req) => {
+            hideUserFromFeed.add(req.fromUserId.toString());
+            hideUserFromFeed.add(req.toUserId.toString());
+        })
+
+        //so in this i am finding all my users except,
+        // the users i have sent connection request or i recived connection reqest from them + my own card.
+        const users = await user.find({
+            $and: [
+                {_id: {$nin: Array.from(hideUserFromFeed)}},
+                {_id: {$ne: loggedInUser._id}}  // our own user if of person who is logged In.
+            ],
+        }).select("fromUserId toUserId firstName lastName");
+        res.send(users);
     }
     catch(err) {
         console.error(err);
