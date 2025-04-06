@@ -13,10 +13,12 @@ app.use(cookieParser());
 const authRouter = require('./routes/auth');
 const profilRouter = require('./routes/profile');
 const requestRouter = require('./routes/request');
+const userRouter = require('./routes/user');
 
 app.use("/", authRouter);
 app.use("/", profilRouter);
 app.use("/", requestRouter);
+app.use("/", userRouter);
 
 connectDB()
 .then(() => {   // if DB Connection is successfull, then start the server, or else show the error of why DB Connecttion failed.

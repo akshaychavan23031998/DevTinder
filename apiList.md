@@ -38,9 +38,9 @@ can i make accepted & rejectedas dynamic by creating single one API ? Yes we can
 
 **userRouter :-**
 
-GET		==>>  /connections
+GET		==>>  /user/request/received
 
-GET		==>>  /requests/received
+GET		==>>  /connections
 
 GET		==>>  /feed	=>> Get the profile of other users on platform.
 
