@@ -62,10 +62,18 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
 userRouter.get('/user/feed', userAuth, async (req,res) => {
     try{
         const loggedInUser = req.user; // this is coming from the userAuth
+
+        //Pagination.
+        const page = parseInt(req.query.page) || 1;
+        let limit = parseInt(req.query.limit) || 10;
+        limit = limit > 50 ? 50 : limit;
+        const skip = (page - 1)*limit;
+
+
         // Find all connection req (sent + recived);
         const connectionRequests = await ConnectionRequest.find({
             $or: [{fromUserId: loggedInUser._id}, {toUserId: loggedInUser._id}],
-        }).select("fromUserId toUserId");
+        }).select("fromUserId toUserId").skip(skip).limit(limit);
 
         // now as these are my friends so i dont want all in my feed.
         const hideUserFromFeed = new Set();
@@ -82,7 +90,7 @@ userRouter.get('/user/feed', userAuth, async (req,res) => {
                 {_id: {$ne: loggedInUser._id}}  // our own user if of person who is logged In.
             ],
         }).select("fromUserId toUserId firstName lastName");
-        res.send(users);
+        res.json({data: users});
     }
     catch(err) {
         console.error(err);
