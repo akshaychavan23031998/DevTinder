@@ -10,6 +10,7 @@ const user = require('../models/user');
 //     res.send("Hey you have Connection Request from "+user.firstName);
 // });
 
+//this API Is for sending the request.
 requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res) => {
     try{
         const toUserId = req.params.toUserId;
@@ -55,5 +56,51 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
         res.status(400).send("ERROR: "+err.message);
     }
 });
+
+// this API is for the accepting or rejecting request.
+requestRouter.post("/request/review/:status/:requestid", userAuth, async (req, res) => {
+    try {
+        // Validate the status (Accepted, Rejected)
+        // Aishu ==>> Rahul (Only Interested)
+        // Rahul (toUserId) should be logged in.
+        // requestid should be validated.
+        
+        const loggedInUser = req.user;
+        const { status, requestid } = req.params;
+
+        const allowedStatus = ["Accepted", "Rejected"];
+        if (!allowedStatus.includes(status)) {
+            return res.status(400).json({
+                message: `${status} is not a valid status`,
+            });
+        }
+
+        const connectionRequest = await ConnectionRequest.findOne({
+            _id: requestid,
+            toUserId: loggedInUser._id,
+            status: "interested",
+        });
+
+        if (!connectionRequest) {
+            return res.status(404).json({
+                message: "Connection request not found",
+            });
+        }
+
+        connectionRequest.status = status;
+        const data = await connectionRequest.save();
+
+        res.json({
+            message: `Connection request ${status}`,
+            data,
+        });
+    } catch (err) {
+        res.status(400).json({
+            message: "ERROR: " + err.message,
+        });
+    }
+});
+
+
 
 module.exports = requestRouter;
