@@ -25,3 +25,5 @@ module.exports = {
     validateSignUpData,
     validateEditProfileData
 }
+
+// Zod

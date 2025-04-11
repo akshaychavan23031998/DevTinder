@@ -7,6 +7,12 @@ const { validateSignUpData } = require("./utils/Validations");
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser')
 const jwt = require('jsonwebtoken');
+const cors = require("cors");
+
+app.use(cors({
+    origin: "http://localhost:5173",
+    credentials: true
+}));            // To Byy pass the CORS Error.
 app.use(express.json());    //==>> its a middleware
 app.use(cookieParser());
 
