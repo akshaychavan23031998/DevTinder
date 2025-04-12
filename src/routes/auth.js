@@ -29,28 +29,67 @@ authRouter.post("/signup", async (req, res) => {
     }
 });
 
-authRouter.post("/login", async (req, res) => {
-    const {emailId, password} = req.body;
-    const existingUser = await user.findOne({emailId: emailId});
-    try {
-        if(!existingUser) {
-            throw new Error("New Email ID, please signup");
-        }
-        const isPasswordValid = await existingUser.validatePassword(password); 
+// authRouter.post("/login", async (req, res) => {
+//     const {emailId, password} = req.body;
+//     const existingUser = await user.findOne({emailId: emailId});
+//     try {
+//         if(!existingUser) {
+//             throw new Error("New Email ID, please signup");
+//         }
+//         const isPasswordValid = await existingUser.validatePassword(password); 
 
-        if(isPasswordValid) {
-            const token = await existingUser.getJWT();  
-            res.cookie("token", token, {
-                expires: new Date(Date.now() + 900000)
-            });
-            res.send(existingUser);
-        }
+//         if(isPasswordValid) {
+//             const token = await existingUser.getJWT();  
+//             res.cookie("token", token, {
+//                 expires: new Date(Date.now() + 900000)
+//             });
+//             res.send(existingUser);
+//         }
+//     }
+//     catch (err) {
+//         console.error(err);
+//         res.status(500).send("Server Error");
+//     }
+// })
+
+// routes/auth.js or wherever your authRouter is defined
+authRouter.post("/login", async (req, res) => {
+    const { emailId, password } = req.body;
+  
+    try {
+      const existingUser = await user.findOne({ emailId });
+  
+      // If user doesn't exist
+      if (!existingUser) {
+        return res.status(401).send("Email ID not found. Please sign up.");
+      }
+  
+      // Validate password
+      const isPasswordValid = await existingUser.validatePassword(password);
+  
+      if (!isPasswordValid) {
+        return res.status(401).send("Invalid password. Please try again.");
+      }
+  
+      // Generate token
+      const token = await existingUser.getJWT();
+  
+      // Set cookie
+      res.cookie("token", token, {
+        httpOnly: true,
+        sameSite: "Lax",
+        secure: false, // set true if using HTTPS
+        expires: new Date(Date.now() + 1000 * 60 * 60), // 1 hour
+      });
+  
+      // Send user data
+      res.status(200).send(existingUser);
+    } catch (err) {
+      console.error("Login API error:", err.message);
+      res.status(500).send("Server error. Please try again later.");
     }
-    catch (err) {
-        console.error(err);
-        res.status(500).send("Server Error");
-    }
-})
+  });
+  
 
 authRouter.post('/logout', async (req, res) => {
     res.cookie("token", {
