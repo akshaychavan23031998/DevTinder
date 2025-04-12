@@ -89,7 +89,7 @@ userRouter.get('/user/feed', userAuth, async (req,res) => {
                 {_id: {$nin: Array.from(hideUserFromFeed)}},
                 {_id: {$ne: loggedInUser._id}}  // our own user if of person who is logged In.
             ],
-        }).select("fromUserId toUserId firstName lastName");
+        }).select("fromUserId toUserId firstName lastName about photo");
         res.json({data: users});
     }
     catch(err) {
