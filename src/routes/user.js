@@ -35,23 +35,86 @@ userRouter.get('/user/connections', userAuth, async (req, res) => {
                 {toUserId: loggedInUser._id, status: "accepted"},
                 {fromUserId: loggedInUser._id, status: "accepted"},
             ]
-        }).populate("fromUserId", ["firstName", "lastName"]).populate("toUserId", ["firstName", "lastName"]);
+        })
+        // .populate("fromUserId", ["firstName", "lastName"]).populate("toUserId", ["firstName", "lastName"]); ==>>this will only give id of connections.
+        .populate("fromUserId", ["firstName", "lastName", "photo", "about"])
+        .populate("toUserId", ["firstName", "lastName", "photo", "about"])
+
+
+        // const data = connectionRequests.map((row) => {
+        //     if(row.fromUserId._id.toString() === loggedInUser._id.toString()) {
+        //         return row.toUserId;
+        //     }
+        //     return row.fromUserId;
+        // });
+        // res.json({
+        //     data
+        // });
 
         const data = connectionRequests.map((row) => {
-            if(row.fromUserId._id.toString() === loggedInUser._id.toString()) {
-                return row.toUserId;
-            }
-            return row.fromUserId;
+            const user = row.fromUserId._id.toString() === loggedInUser._id.toString()
+                ? row.toUserId
+                : row.fromUserId;
+
+            return {
+                _id: user._id,
+                firstName: user.firstName,
+                lastName: user.lastName,
+                photo: user.photo,
+                about: user.about
+            };
         });
-        res.json({
-            data
-        });
+
+        res.json({ data });
     }
     catch(err) {
         console.error(err);
         res.status(500).send('Server Error');
     }
 })
+
+// this can be one more way as well.
+// userRouter.get('/user/connections', userAuth, async (req, res) => {
+//     try {
+//         const loggedInUser = req.user;
+
+//         const connectionRequests = await ConnectionRequest.find({
+//             $or: [
+//                 { toUserId: loggedInUser._id, status: "accepted" },
+//                 { fromUserId: loggedInUser._id, status: "accepted" },
+//             ]
+//         })
+//         .populate({
+//             path: "fromUserId",
+//             select: "_id firstName lastName photo about"
+//         })
+//         .populate({
+//             path: "toUserId",
+//             select: "_id firstName lastName photo about"
+//         });
+
+//         const data = connectionRequests.map((row) => {
+//             const user = row.fromUserId._id.toString() === loggedInUser._id.toString()
+//                 ? row.toUserId
+//                 : row.fromUserId;
+
+//             return {
+//                 _id: user._id,
+//                 firstName: user.firstName,
+//                 lastName: user.lastName,
+//                 photo: user.photo,
+//                 about: user.about
+//             };
+//         });
+
+//         res.json({ data });
+//     } catch (err) {
+//         console.error(err);
+//         res.status(500).send('Server Error');
+//     }
+// });
+
+
 
 //this API is for feed, so who's profile we need to show, all the users which are signedup except below
 // 1st i should not see my own profile in feed.
