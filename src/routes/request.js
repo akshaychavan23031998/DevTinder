@@ -58,17 +58,60 @@ requestRouter.post("/request/send/:status/:toUserId", userAuth, async (req, res)
 });
 
 // this API is for the accepting or rejecting request.
+// requestRouter.post("/request/review/:status/:requestid", userAuth, async (req, res) => {
+//     try {
+//         // Validate the status (Accepted, Rejected)
+//         // Aishu ==>> Rahul (Only Interested)
+//         // Rahul (toUserId) should be logged in.
+//         // requestid should be validated.
+        
+//         const loggedInUser = req.user;
+//         const { status, requestid } = req.params;
+
+//         // const allowedStatus = ["Accepted", "Rejected"];
+//         const allowedStatus = ["accepted", "rejected"];
+//         if (!allowedStatus.includes(status)) {
+//             return res.status(400).json({
+//                 message: `${status} is not a valid status`,
+//             });
+//         }
+
+//         const connectionRequest = await ConnectionRequest.findOne({
+//             _id: requestid,
+//             toUserId: loggedInUser._id,
+//             status: "interested",
+//         });
+
+//         if (!connectionRequest) {
+//             return res.status(404).json({
+//                 message: "Connection request not found",
+//             });
+//         }
+
+//         connectionRequest.status = status;
+//         const data = await connectionRequest.save();
+
+//         res.json({
+//             message: `Connection request ${status}`,
+//             data,
+//         });
+//     } catch (err) {
+//         res.status(400).json({
+//             message: "ERROR: " + err.message,
+//         });
+//     }
+// });
+
+//This Below API is more optimized.
+// this API is for the accepting or rejecting request.
 requestRouter.post("/request/review/:status/:requestid", userAuth, async (req, res) => {
     try {
-        // Validate the status (Accepted, Rejected)
-        // Aishu ==>> Rahul (Only Interested)
-        // Rahul (toUserId) should be logged in.
-        // requestid should be validated.
-        
         const loggedInUser = req.user;
-        const { status, requestid } = req.params;
+        const { requestid } = req.params;
+        const status = req.params.status.toLowerCase(); // 🔥 Normalize here
 
-        const allowedStatus = ["Accepted", "Rejected"];
+        const allowedStatus = ["accepted", "rejected"]; // 🔥 Also lowercase here
+
         if (!allowedStatus.includes(status)) {
             return res.status(400).json({
                 message: `${status} is not a valid status`,
@@ -78,7 +121,7 @@ requestRouter.post("/request/review/:status/:requestid", userAuth, async (req, r
         const connectionRequest = await ConnectionRequest.findOne({
             _id: requestid,
             toUserId: loggedInUser._id,
-            status: "interested",
+            status: "interested", // only interested can be reviewed
         });
 
         if (!connectionRequest) {
@@ -87,7 +130,7 @@ requestRouter.post("/request/review/:status/:requestid", userAuth, async (req, r
             });
         }
 
-        connectionRequest.status = status;
+        connectionRequest.status = status; // 🔥 Will match Mongoose enum
         const data = await connectionRequest.save();
 
         res.json({
@@ -100,6 +143,7 @@ requestRouter.post("/request/review/:status/:requestid", userAuth, async (req, r
         });
     }
 });
+
 
 
 

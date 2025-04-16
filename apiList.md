@@ -45,3 +45,8 @@ GET		==>>  /connections
 GET		==>>  /feed	=>> Get the profile of other users on platform.
 
 **STATUS: interested, ingnored,accepted,rejected**
+
+
+Now rahul has 3 connections ==>> akshay, aishu and ramanna.
+
+Now aishu accepted request of Akshay, and rahul accepted the connection of akshay, means inakshay's connection aishu and rahul should be there as a connections, ==>> Perfectly working.
