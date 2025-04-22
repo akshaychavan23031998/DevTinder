@@ -3,7 +3,9 @@ const app = express();
 const connectDB = require("./config/database");
 const {adminAuth, userAuth} = require('./middlewares/auth');
 const user = require("./models/user");
-const { validateSignUpData } = require("./utils/Validations");
+// const { validateSignUpData } = require("./utils/Validations");
+const { validateSignUpData } = require("./utils/validations");
+
 const bcrypt = require('bcrypt');
 const cookieParser = require('cookie-parser')
 const jwt = require('jsonwebtoken');
